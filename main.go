@@ -315,7 +315,7 @@ func createPDF(r InvoiceFigures) {
 	}
 	homedir := myself.HomeDir
 
-	err = pt.Save(homedir +"/Dropbox/invoice_test/" + r.Stylist + "/invoice_" + r.Invoice + ".pdf")
+	err = pt.Save(homedir +"/Dropbox/chair renters/" + r.Stylist + "/Invoices/invoice_" + r.Invoice + ".pdf")
 	if err != nil {
 		panic("Couldn't save pdf.")
 	}
