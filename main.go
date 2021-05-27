@@ -314,21 +314,39 @@ func createPDF(r InvoiceFigures) {
 		panic(err)
 	}
 
+	//get home directory
 	myself, err := user.Current()
 	if err != nil {
 		panic(err)
 	}
 	homedir := myself.HomeDir
-	//dir := homedir + "/Dropbox/chair renters/" + r.Stylist + "/Invoices/"
-	dir := homedir + "/Dropbox/invoice_test/"
-	fileName := "invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf"
 
-	err = pt.Save(dir + fileName)
+	//dir1 := homedir + "/Dropbox/chair renters/" + r.Stylist + "/Invoices/"
+	dir1 := homedir + "/Dropbox/invoice_test/"
+	fn1 := "invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf"
+
+	//get year for directory
+	d := dateFormat(r.Date)
+	m := strings.Split(d, "-")[1]
+	y := strings.Split(d, "-")[2]
+
+	dir2 := homedir + "/Dropbox/Salon Accounts/Invoices/20" + y + "/" + m + y + "/"
+	fn2 := r.Stylist + " - inv " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf"
+
+	//save within the apps output folder
+	err = pt.Save("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf")
 	if err != nil {
 		panic("Couldn't save pdf.")
 	}
 
-	err = pt.Save("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf")
+	//save to chair renters dropbox folder
+	err = pt.Save(dir1 + fn1)
+	if err != nil {
+		panic("Couldn't save pdf.")
+	}
+
+	//save to salon accounts folder
+	err = pt.Save(dir2 + fn2)
 	if err != nil {
 		panic("Couldn't save pdf.")
 	}
@@ -364,8 +382,6 @@ func sendInvoice(r InvoiceFigures) {
 	body := textContent
 	recipient := email[r.Stylist]
 
-
-
 	m := mg.NewMessage(sender, subject, body, recipient)
 
 	m.SetHtml(htmlContent)
@@ -385,7 +401,6 @@ func sendInvoice(r InvoiceFigures) {
 }
 
 func ParseEmailTemplate(templateFileName string, data interface{}) (content string, err error) {
-
 	tmpl, err := template.ParseFiles(templateFileName)
 	if err != nil {
 		return "", err
