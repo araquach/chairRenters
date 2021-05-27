@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <h1>{{ .Stylist }} - Your latest invoice</h1>
+    <h2>Invoice number: {{.Invoice}}</h2>
+    <p>For period: {{ .DateFrom }} to {{ .DateTo }}</p>
+    <table>
+        <tr>
+            <td>Services:</td>
+            <td>{{ .Services }}</td>
+        </tr>
+        <tr>
+            <td>Products:</td>
+            <td>{{ .Products }}</td>
+        </tr>
+        <tr>
+            <td><strong>Total Revenue:</strong></td>
+            <td><strong>{{ .TotalRev }}</strong></td>
+        </tr>
+        <tr>
+            <td><strong>Credit Released:</strong></td>
+            <td><strong>{{ .TotalRel }}</strong></td>
+        </tr>
+    </table>
+
+</body>
+</html>

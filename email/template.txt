@@ -1,0 +1,9 @@
+{{ .Stylist }} - Your latest invoice
+Invoice number: {{.Invoice}}
+For period: {{ .DateFrom }} to {{ .DateTo }}
+
+Services: {{ .Services }}
+Products: {{ .Products }}
+Total Revenue: {{ .TotalRev }}
+
+Credit Released: {{ .TotalRel }}

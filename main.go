@@ -2,16 +2,20 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/csv"
 	"fmt"
+	"github.com/mailgun/mailgun-go/v3"
 	"github.com/signintech/pdft"
 	gopdf "github.com/signintech/pdft/minigopdf"
+	"html/template"
 	"io"
 	"io/ioutil"
 	"log"
 	"os/user"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type InvoiceFigures struct {
@@ -124,6 +128,7 @@ func main() {
 	}
 	for _, v := range results {
 		createPDF(v)
+		sendInvoice(v)
 		fmt.Println(v.Stylist, v.TotalRel)
 	}
 }
@@ -314,8 +319,16 @@ func createPDF(r InvoiceFigures) {
 		panic(err)
 	}
 	homedir := myself.HomeDir
+	//dir := homedir + "/Dropbox/chair renters/" + r.Stylist + "/Invoices/"
+	dir := homedir + "/Dropbox/invoice_test/"
+	fileName := "invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf"
 
-	err = pt.Save(homedir +"/Dropbox/chair renters/" + r.Stylist + "/Invoices/invoice_" + r.Invoice + ".pdf")
+	err = pt.Save(dir + fileName)
+	if err != nil {
+		panic("Couldn't save pdf.")
+	}
+
+	err = pt.Save("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf")
 	if err != nil {
 		panic("Couldn't save pdf.")
 	}
@@ -323,6 +336,68 @@ func createPDF(r InvoiceFigures) {
 
 func dateFormat(d string) (f string) {
 	s := strings.Split(d, "/")
-	f = s[2] + "-" + s[1] + "-" + s[0]
+	f = s[0] + "-" + s[1] + "-" + s[2]
 	return
 }
+
+func sendInvoice(r InvoiceFigures) {
+	email := map[string]string{
+		"Natalie Sharpe": "araquach@yahoo.co.uk",
+		"Matthew Lane":   "adam@jakatasalon.co.uk",
+		"Michelle Railton": "adam@paulkemphairdressing.com",
+	}
+
+	htmlContent, err := ParseEmailTemplate("email/template.gohtml", r)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	textContent, err := ParseEmailTemplate("email/template.txt", r)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	mg := mailgun.NewMailgun("jakatasalon.co.uk", "key-7bdc914427016c8714ed8ef2108a5a49")
+
+	sender := "adam@jakatasalon.co.uk"
+	subject := "Your Latest Invoice"
+	body := textContent
+	recipient := email[r.Stylist]
+
+
+
+	m := mg.NewMessage(sender, subject, body, recipient)
+
+	m.SetHtml(htmlContent)
+	m.AddAttachment("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf")
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+
+	// Send the message	with a 10 second timeout
+	resp, id, err := mg.Send(ctx, m)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("ID: %s Resp: %s\n", id, resp)
+}
+
+func ParseEmailTemplate(templateFileName string, data interface{}) (content string, err error) {
+
+	tmpl, err := template.ParseFiles(templateFileName)
+	if err != nil {
+		return "", err
+	}
+
+	buf := new(bytes.Buffer)
+
+	if err := tmpl.Execute(buf, data); err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
+}
+
+
