@@ -170,6 +170,12 @@ func createPDF(r InvoiceFigures) {
 		panic(err)
 	}
 
+	// Date Range:
+	err = pt.Insert(string(r.DateFrom) + " to " + string(r.DateTo), 1, 465, 221, 100, 100, gopdf.Left|gopdf.Top)
+	if err != nil {
+		panic(err)
+	}
+
 	// Service Revenue:
 	err = pt.Insert(string("£" + r.Services), 1, 200, 281.5, 100, 100, gopdf.Center|gopdf.Top)
 	if err != nil {
@@ -321,8 +327,8 @@ func createPDF(r InvoiceFigures) {
 	}
 	homedir := myself.HomeDir
 
-	//dir1 := homedir + "/Dropbox/chair renters/" + r.Stylist + "/Invoices/"
-	dir1 := homedir + "/Dropbox/invoice_test/"
+	dir1 := homedir + "/Dropbox/chair renters/" + r.Stylist + "/Invoices/"
+	//dir1 := homedir + "/Dropbox/invoice_test/"
 	fn1 := "invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf"
 
 	//get year for directory
