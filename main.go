@@ -47,7 +47,7 @@ type InvoiceFigures struct {
 func main() {
 	var results []InvoiceFigures
 
-	content, _ := ioutil.ReadFile("figures/01-05-21.csv")
+	content, _ := ioutil.ReadFile("figures/30-05-21.csv")
 
 	reader := csv.NewReader(bytes.NewBuffer(content))
 	_, err := reader.Read() // skip first line
@@ -129,7 +129,7 @@ func main() {
 	for _, v := range results {
 		createPDF(v)
 		sendInvoice(v)
-		fmt.Println(v.Stylist, v.TotalRel)
+		fmt.Println(v.Stylist, v.Invoice, v.TotalRel)
 	}
 }
 
@@ -366,9 +366,9 @@ func dateFormat(d string) (f string) {
 
 func sendInvoice(r InvoiceFigures) {
 	email := map[string]string{
-		"Natalie Sharpe": "araquach@yahoo.co.uk",
-		"Matthew Lane":   "adam@jakatasalon.co.uk",
-		"Michelle Railton": "adam@paulkemphairdressing.com",
+		"Natalie Sharpe": "nsharpe13@yahoo.com",
+		"Matthew Lane":   "xmlaneyx@hotmail.co.uk",
+		"Michelle Railton": "michellerailton@hotmail.com",
 	}
 
 	htmlContent, err := ParseEmailTemplate("email/template.gohtml", r)
