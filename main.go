@@ -47,7 +47,10 @@ type InvoiceFigures struct {
 func main() {
 	var results []InvoiceFigures
 
-	content, _ := ioutil.ReadFile("figures/30-05-21.csv")
+	//now := time.Now()
+	//today := now.Format("02-01-2006")
+
+	content, _ := ioutil.ReadFile("figures/12-06-21")
 
 	reader := csv.NewReader(bytes.NewBuffer(content))
 	_, err := reader.Read() // skip first line
