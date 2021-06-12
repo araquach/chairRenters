@@ -47,20 +47,10 @@ type InvoiceFigures struct {
 func main() {
 	var results []InvoiceFigures
 
-<<<<<<< HEAD
-	//now := time.Now()
-	//today := now.Format("02-01-2006")
-
-	content, err := ioutil.ReadFile("figures/01-05-21.csv")
-	if err != nil {
-		panic(err)
-	}
-=======
 	content, _ := ioutil.ReadFile("figures/01-05-21.csv")
->>>>>>> parent of 216026a (Added Invoice number)
 
 	reader := csv.NewReader(bytes.NewBuffer(content))
-	_, err = reader.Read() // skip first line
+	_, err := reader.Read() // skip first line
 	if err != nil {
 		if err != io.EOF {
 			log.Fatalln(err)
