@@ -50,10 +50,13 @@ func main() {
 	//now := time.Now()
 	//today := now.Format("02-01-2006")
 
-	content, _ := ioutil.ReadFile("figures/12-06-21")
+	content, err := ioutil.ReadFile("figures/01-05-21.csv")
+	if err != nil {
+		panic(err)
+	}
 
 	reader := csv.NewReader(bytes.NewBuffer(content))
-	_, err := reader.Read() // skip first line
+	_, err = reader.Read() // skip first line
 	if err != nil {
 		if err != io.EOF {
 			log.Fatalln(err)
