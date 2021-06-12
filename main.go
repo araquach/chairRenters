@@ -47,7 +47,10 @@ type InvoiceFigures struct {
 func main() {
 	var results []InvoiceFigures
 
-	content, _ := ioutil.ReadFile("figures/12-06-21.csv")
+	now := time.Now()
+	today := now.Format("02-01-2006")
+
+	content, _ := ioutil.ReadFile("figures/" + today + ".csv")
 
 	reader := csv.NewReader(bytes.NewBuffer(content))
 	_, err := reader.Read() // skip first line
@@ -129,7 +132,7 @@ func main() {
 	for _, v := range results {
 		createPDF(v)
 		sendInvoice(v)
-		fmt.Println(v.Stylist, v.TotalRel)
+		fmt.Println(v.Stylist, v.Invoice, v.TotalRel)
 	}
 }
 
@@ -342,19 +345,19 @@ func createPDF(r InvoiceFigures) {
 	//save within the apps output folder
 	err = pt.Save("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf")
 	if err != nil {
-		panic("Couldn't save pdf.")
+		log.Fatalf("Couldn't save output pdf of %v", r.Stylist)
 	}
 
 	//save to chair renters dropbox folder
 	err = pt.Save(dir1 + fn1)
 	if err != nil {
-		panic("Couldn't save pdf.")
+		log.Fatalf("Couldn't save dropbox pdf of %v", r.Stylist)
 	}
 
 	//save to salon accounts folder
 	err = pt.Save(dir2 + fn2)
 	if err != nil {
-		panic("Couldn't save pdf.")
+		log.Fatalf("Couldn't save accounts pdf of %v", r.Stylist)
 	}
 }
 
@@ -366,9 +369,9 @@ func dateFormat(d string) (f string) {
 
 func sendInvoice(r InvoiceFigures) {
 	email := map[string]string{
-		"Natalie Sharpe": "araquach@yahoo.co.uk",
-		"Matthew Lane":   "adam@jakatasalon.co.uk",
-		"Michelle Railton": "adam@paulkemphairdressing.com",
+		"Natalie Sharpe": "nsharpe13@yahoo.com",
+		"Matthew Lane":   "xmlaneyx@hotmail.co.uk",
+		"Michelle Railton": "michellerailton@hotmail.com",
 	}
 
 	htmlContent, err := ParseEmailTemplate("email/template.gohtml", r)
