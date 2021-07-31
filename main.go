@@ -133,6 +133,7 @@ func main() {
 		createPDF(v)
 		sendInvoice(v)
 		fmt.Println(v.Stylist, v.Invoice, v.TotalRel)
+		time.Sleep(300 * time.Millisecond)
 	}
 }
 
