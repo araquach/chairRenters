@@ -331,7 +331,7 @@ func createPDF(r InvoiceFigures) {
 	}
 	homedir := myself.HomeDir
 
-	dir1 := homedir + "/Dropbox/chair renters/" + r.Stylist + "/Invoices/"
+	dir1 := homedir + "/Dropbox (Personal)/chair renters/" + r.Stylist + "/Invoices/"
 	//dir1 := homedir + "/Dropbox/invoice_test/"
 	fn1 := "invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf"
 
@@ -340,7 +340,7 @@ func createPDF(r InvoiceFigures) {
 	m := strings.Split(d, "-")[1]
 	y := strings.Split(d, "-")[2]
 
-	dir2 := homedir + "/Dropbox/Salon Accounts/Invoices/20" + y + "/" + m + y + "/"
+	dir2 := homedir + "/Dropbox (Personal)/Salon Accounts/Invoices/20" + y + "/" + m + y + "/"
 	fn2 := r.Stylist + " - inv " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf"
 
 	//save within the apps output folder
