@@ -133,7 +133,6 @@ func main() {
 		createPDF(v)
 		sendInvoice(v)
 		fmt.Println(v.Stylist, v.Invoice, v.TotalRel)
-		time.Sleep(300 * time.Millisecond)
 	}
 }
 
@@ -348,18 +347,19 @@ func createPDF(r InvoiceFigures) {
 	if err != nil {
 		log.Fatalf("Couldn't save output pdf of %v", r.Stylist)
 	}
-
+	time.Sleep(120 * time.Millisecond)
 	//save to chair renters dropbox folder
 	err = pt.Save(dir1 + fn1)
 	if err != nil {
 		log.Fatalf("Couldn't save dropbox pdf of %v", r.Stylist)
 	}
-
+	time.Sleep(120 * time.Millisecond)
 	//save to salon accounts folder
 	err = pt.Save(dir2 + fn2)
 	if err != nil {
 		log.Fatalf("Couldn't save accounts pdf of %v", r.Stylist)
 	}
+	time.Sleep(120 * time.Millisecond)
 }
 
 func dateFormat(d string) (f string) {
