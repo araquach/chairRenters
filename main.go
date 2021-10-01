@@ -342,6 +342,7 @@ func createPDF(r InvoiceFigures) {
 	dir2 := homedir + "/Dropbox (Personal)/Salon Accounts/Invoices/20" + y + "/" + m + y + "/"
 	fn2 := r.Stylist + " - inv " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf"
 
+	time.Sleep(120 * time.Millisecond)
 	//save within the apps output folder
 	err = pt.Save("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf")
 	if err != nil {
