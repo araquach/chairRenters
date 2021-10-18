@@ -425,5 +425,3 @@ func ParseEmailTemplate(templateFileName string, data interface{}) (content stri
 
 	return buf.String(), nil
 }
-
-
