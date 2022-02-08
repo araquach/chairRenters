@@ -81,7 +81,7 @@ func main() {
 
 		retailPurchase := products * .5
 		retailProfit := (products - retailPurchase) * .4
-		retailVAT := retailPurchase + retailProfit*.2
+		retailVAT := retailProfit * .2
 
 		charges := serviceCharge + retailPurchase + retailProfit + wklyCharge
 		chargesVAT := servVAT + retailVAT
@@ -174,19 +174,21 @@ func createPDF(r InvoiceFigures) {
 	}
 
 	// Date Range:
-	err = pt.Insert(string(r.DateFrom)+" to "+string(r.DateTo), 1, 465, 221, 100, 100, gopdf.Left|gopdf.Top)
+	err = pt.Insert(string(r.DateFrom) + " to " + string(r.DateTo), 1, 465, 221, 100, 100, gopdf.Left|gopdf.Top)
 	if err != nil {
 		panic(err)
 	}
 
 	// Service Revenue:
-	err = pt.Insert(string("£"+r.Services), 1, 200, 281.5, 100, 100, gopdf.Center|gopdf.Top)
+	err = pt.Insert(string("£" + r.Services), 1, 200, 281.5, 100, 100, gopdf.Center|gopdf.Top)
 	if err != nil {
 		panic(err)
 	}
 
+	time.Sleep(100 * time.Millisecond)
+
 	// Product Revenue:
-	err = pt.Insert("£"+r.Products, 1, 200, 305.5, 100, 100, gopdf.Center|gopdf.Top)
+	err = pt.Insert("£" + r.Products, 1, 200, 305.5, 100, 100, gopdf.Center|gopdf.Top)
 	if err != nil {
 		panic(err)
 	}
@@ -206,6 +208,8 @@ func createPDF(r InvoiceFigures) {
 	if err != nil {
 		panic(err)
 	}
+
+	time.Sleep(100 * time.Millisecond)
 
 	// 45% Service Charge
 	err = pt.Insert(r.ServiceCharge, 1, 200, 406.5, 100, 100, gopdf.Center|gopdf.Top)
@@ -231,6 +235,8 @@ func createPDF(r InvoiceFigures) {
 		panic(err)
 	}
 
+	time.Sleep(100 * time.Millisecond)
+
 	// Retail Credit Release
 	err = pt.Insert(r.RetailRel, 1, 200, 549.5, 100, 100, gopdf.Center|gopdf.Top)
 	if err != nil {
@@ -238,13 +244,13 @@ func createPDF(r InvoiceFigures) {
 	}
 
 	// Other Service Payments
-	err = pt.Insert("£"+r.Extra, 1, 200, 574.5, 100, 100, gopdf.Center|gopdf.Top)
+	err = pt.Insert("£" + r.Extra, 1, 200, 574.5, 100, 100, gopdf.Center|gopdf.Top)
 	if err != nil {
 		panic(err)
 	}
 
 	// Tips
-	err = pt.Insert("£"+r.Tips, 1, 200, 600.5, 100, 100, gopdf.Center|gopdf.Top)
+	err = pt.Insert("£" + r.Tips, 1, 200, 600.5, 100, 100, gopdf.Center|gopdf.Top)
 	if err != nil {
 		panic(err)
 	}
@@ -259,6 +265,8 @@ func createPDF(r InvoiceFigures) {
 	if err != nil {
 		panic(err)
 	}
+
+	time.Sleep(100 * time.Millisecond)
 
 	// Total Remaining
 	err = pt.Insert("£0.00", 1, 200, 653, 100, 100, gopdf.Center|gopdf.Top)
@@ -282,6 +290,8 @@ func createPDF(r InvoiceFigures) {
 		panic(err)
 	}
 
+	time.Sleep(100 * time.Millisecond)
+
 	// 50% Retail Charge on retail
 	err = pt.Insert(r.RetailPurchase, 1, 465, 406.5, 100, 100, gopdf.Center|gopdf.Top)
 	if err != nil {
@@ -300,17 +310,19 @@ func createPDF(r InvoiceFigures) {
 		panic(err)
 	}
 
-	// Charges
-	err = pt.Insert(r.Charges, 1, 465, 522.5, 100, 100, gopdf.Center|gopdf.Top)
+	// Service Credit Release
+	err = pt.Insert(r.ServiceRel, 1, 465, 522.5, 100, 100, gopdf.Center|gopdf.Top)
 	if err != nil {
 		panic(err)
 	}
 
-	// Charges Plus VAT
-	err = pt.Insert(r.ChargesVAT, 1, 465, 549.5, 100, 100, gopdf.Center|gopdf.Top)
+	// Retail Credit Release
+	err = pt.Insert(r.RetailRel, 1, 465, 549.5, 100, 100, gopdf.Center|gopdf.Top)
 	if err != nil {
 		panic(err)
 	}
+
+	time.Sleep(100 * time.Millisecond)
 
 	err = pt.SetFont("helvetica-bold", "", 10)
 	if err != nil {
@@ -330,37 +342,37 @@ func createPDF(r InvoiceFigures) {
 	}
 	homedir := myself.HomeDir
 
-	dir1 := homedir + "/Dropbox (Personal)/chair renters/" + r.Stylist + "/Invoices/"
+	dir1 := homedir + "/Jakata Salon Dropbox/Adam Carter/Salon Stuff/chair renters/" + r.Stylist + "/Invoices/"
 	//dir1 := homedir + "/Dropbox/invoice_test/"
-	fn1 := "invoice " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf"
+	fn1 := "invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf"
 
 	//get year for directory
 	d := dateFormat(r.Date)
 	m := strings.Split(d, "-")[1]
 	y := strings.Split(d, "-")[2]
 
-	dir2 := homedir + "/Dropbox (Personal)/Salon Accounts/Invoices/20" + y + "/" + m + y + "/"
-	fn2 := r.Stylist + " - inv " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf"
+	dir2 := homedir + "/Jakata Salon Dropbox/Adam Carter/Salon Stuff/Salon Accounts 2/Invoices//20" + y + "/" + m + y + "/"
+	fn2 := r.Stylist + " - inv " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf"
 
-	time.Sleep(120 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 	//save within the apps output folder
-	err = pt.Save("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf")
+	err = pt.Save("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf")
 	if err != nil {
 		log.Fatalf("Couldn't save output pdf of %v", r.Stylist)
 	}
-	time.Sleep(120 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 	//save to chair renters dropbox folder
 	err = pt.Save(dir1 + fn1)
 	if err != nil {
 		log.Fatalf("Couldn't save dropbox pdf of %v", r.Stylist)
 	}
-	time.Sleep(120 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 	//save to salon accounts folder
 	err = pt.Save(dir2 + fn2)
 	if err != nil {
 		log.Fatalf("Couldn't save accounts pdf of %v", r.Stylist)
 	}
-	time.Sleep(120 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
 }
 
 func dateFormat(d string) (f string) {
@@ -371,8 +383,8 @@ func dateFormat(d string) (f string) {
 
 func sendInvoice(r InvoiceFigures) {
 	email := map[string]string{
-		"Natalie Sharpe":   "nsharpe13@yahoo.com",
-		"Matthew Lane":     "xmlaneyx@hotmail.co.uk",
+		"Natalie Sharpe": "nsharpe13@yahoo.com",
+		"Matthew Lane":   "xmlaneyx@hotmail.co.uk",
 		"Michelle Railton": "michellerailton@hotmail.com",
 	}
 
@@ -396,7 +408,7 @@ func sendInvoice(r InvoiceFigures) {
 	m := mg.NewMessage(sender, subject, body, recipient)
 
 	m.SetHtml(htmlContent)
-	m.AddAttachment("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf")
+	m.AddAttachment("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
