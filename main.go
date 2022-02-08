@@ -81,7 +81,7 @@ func main() {
 
 		retailPurchase := products * .5
 		retailProfit := (products - retailPurchase) * .4
-		retailVAT := retailProfit * .2
+		retailVAT := retailPurchase + retailProfit*.2
 
 		charges := serviceCharge + retailPurchase + retailProfit + wklyCharge
 		chargesVAT := servVAT + retailVAT
@@ -174,19 +174,19 @@ func createPDF(r InvoiceFigures) {
 	}
 
 	// Date Range:
-	err = pt.Insert(string(r.DateFrom) + " to " + string(r.DateTo), 1, 465, 221, 100, 100, gopdf.Left|gopdf.Top)
+	err = pt.Insert(string(r.DateFrom)+" to "+string(r.DateTo), 1, 465, 221, 100, 100, gopdf.Left|gopdf.Top)
 	if err != nil {
 		panic(err)
 	}
 
 	// Service Revenue:
-	err = pt.Insert(string("£" + r.Services), 1, 200, 281.5, 100, 100, gopdf.Center|gopdf.Top)
+	err = pt.Insert(string("£"+r.Services), 1, 200, 281.5, 100, 100, gopdf.Center|gopdf.Top)
 	if err != nil {
 		panic(err)
 	}
 
 	// Product Revenue:
-	err = pt.Insert("£" + r.Products, 1, 200, 305.5, 100, 100, gopdf.Center|gopdf.Top)
+	err = pt.Insert("£"+r.Products, 1, 200, 305.5, 100, 100, gopdf.Center|gopdf.Top)
 	if err != nil {
 		panic(err)
 	}
@@ -238,13 +238,13 @@ func createPDF(r InvoiceFigures) {
 	}
 
 	// Other Service Payments
-	err = pt.Insert("£" + r.Extra, 1, 200, 574.5, 100, 100, gopdf.Center|gopdf.Top)
+	err = pt.Insert("£"+r.Extra, 1, 200, 574.5, 100, 100, gopdf.Center|gopdf.Top)
 	if err != nil {
 		panic(err)
 	}
 
 	// Tips
-	err = pt.Insert("£" + r.Tips, 1, 200, 600.5, 100, 100, gopdf.Center|gopdf.Top)
+	err = pt.Insert("£"+r.Tips, 1, 200, 600.5, 100, 100, gopdf.Center|gopdf.Top)
 	if err != nil {
 		panic(err)
 	}
@@ -300,14 +300,14 @@ func createPDF(r InvoiceFigures) {
 		panic(err)
 	}
 
-	// Service Credit Release
-	err = pt.Insert(r.ServiceRel, 1, 465, 522.5, 100, 100, gopdf.Center|gopdf.Top)
+	// Charges
+	err = pt.Insert(r.Charges, 1, 465, 522.5, 100, 100, gopdf.Center|gopdf.Top)
 	if err != nil {
 		panic(err)
 	}
 
-	// Retail Credit Release
-	err = pt.Insert(r.RetailRel, 1, 465, 549.5, 100, 100, gopdf.Center|gopdf.Top)
+	// Charges Plus VAT
+	err = pt.Insert(r.ChargesVAT, 1, 465, 549.5, 100, 100, gopdf.Center|gopdf.Top)
 	if err != nil {
 		panic(err)
 	}
@@ -332,7 +332,7 @@ func createPDF(r InvoiceFigures) {
 
 	dir1 := homedir + "/Dropbox (Personal)/chair renters/" + r.Stylist + "/Invoices/"
 	//dir1 := homedir + "/Dropbox/invoice_test/"
-	fn1 := "invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf"
+	fn1 := "invoice " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf"
 
 	//get year for directory
 	d := dateFormat(r.Date)
@@ -340,11 +340,11 @@ func createPDF(r InvoiceFigures) {
 	y := strings.Split(d, "-")[2]
 
 	dir2 := homedir + "/Dropbox (Personal)/Salon Accounts/Invoices/20" + y + "/" + m + y + "/"
-	fn2 := r.Stylist + " - inv " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf"
+	fn2 := r.Stylist + " - inv " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf"
 
 	time.Sleep(120 * time.Millisecond)
 	//save within the apps output folder
-	err = pt.Save("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf")
+	err = pt.Save("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf")
 	if err != nil {
 		log.Fatalf("Couldn't save output pdf of %v", r.Stylist)
 	}
@@ -371,8 +371,8 @@ func dateFormat(d string) (f string) {
 
 func sendInvoice(r InvoiceFigures) {
 	email := map[string]string{
-		"Natalie Sharpe": "nsharpe13@yahoo.com",
-		"Matthew Lane":   "xmlaneyx@hotmail.co.uk",
+		"Natalie Sharpe":   "nsharpe13@yahoo.com",
+		"Matthew Lane":     "xmlaneyx@hotmail.co.uk",
 		"Michelle Railton": "michellerailton@hotmail.com",
 	}
 
@@ -396,7 +396,7 @@ func sendInvoice(r InvoiceFigures) {
 	m := mg.NewMessage(sender, subject, body, recipient)
 
 	m.SetHtml(htmlContent)
-	m.AddAttachment("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf")
+	m.AddAttachment("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
@@ -425,5 +425,3 @@ func ParseEmailTemplate(templateFileName string, data interface{}) (content stri
 
 	return buf.String(), nil
 }
-
-
