@@ -131,7 +131,7 @@ func main() {
 	}
 	for _, v := range results {
 		createPDF(v)
-		// sendInvoice(v)
+		sendInvoice(v)
 		fmt.Println(v.Stylist, v.Invoice, v.TotalRel)
 	}
 }
