@@ -12,6 +12,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"os/user"
 	"strconv"
 	"strings"
 	"time"
@@ -73,7 +74,7 @@ func main() {
 		extra, _ := strconv.ParseFloat(col[9], 8)
 
 		totalRev := services + products
-		serviceCharge := (services - tips) * .45
+		serviceCharge := services * .45
 		wklyCharge := float64(weeks) * 5.00
 		servVAT := (serviceCharge + wklyCharge) * .2
 		serviceRel := services - serviceCharge - wklyCharge - servVAT
@@ -335,23 +336,22 @@ func createPDF(r InvoiceFigures) {
 	}
 
 	//get home directory
-	// myself, err := user.Current()
+	myself, err := user.Current()
 	if err != nil {
 		panic(err)
 	}
-	// homedir := myself.HomeDir
+	homedir := myself.HomeDir
 
-	// dir1 := homedir + "/Jakata Salon Dropbox/Adam Carter/Salon Stuff/chair renters/" + r.Stylist + "/Invoices/"
-	// dir1 := homedir + "/Dropbox/invoice_test/"
-	// fn1 := "invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf"
+	dir1 := homedir + "/Jakata Salon Dropbox/Adam Carter/Salon Stuff/chair renters/" + r.Stylist + "/Invoices/"
+	fn1 := "invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf"
 
 	//get year for directory
-	// d := dateFormat(r.Date)
-	// m := strings.Split(d, "-")[1]
-	// y := strings.Split(d, "-")[2]
+	d := dateFormat(r.Date)
+	m := strings.Split(d, "-")[1]
+	y := strings.Split(d, "-")[2]
 
-	// dir2 := homedir + "/Jakata Salon Dropbox/Adam Carter/Salon Stuff/Salon Accounts 2/Invoices//20" + y + "/" + m + y + "/"
-	// fn2 := r.Stylist + " - inv " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf"
+	dir2 := homedir + "/Jakata Salon Dropbox/Adam Carter/Salon Stuff/Salon Accounts 2/Invoices//20" + y + "/" + m + y + "/"
+	fn2 := r.Stylist + " - inv " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf"
 
 	time.Sleep(500 * time.Millisecond)
 	//save within the apps output folder
@@ -359,19 +359,19 @@ func createPDF(r InvoiceFigures) {
 	if err != nil {
 		log.Fatalf("Couldn't save output pdf of %v", r.Stylist)
 	}
-	//time.Sleep(500 * time.Millisecond)
-	////save to chair renters dropbox folder
-	//err = pt.Save(dir1 + fn1)
-	//if err != nil {
-	//	log.Fatalf("Couldn't save dropbox pdf of %v", r.Stylist)
-	//}
-	//time.Sleep(500 * time.Millisecond)
-	////save to salon accounts folder
-	//err = pt.Save(dir2 + fn2)
-	//if err != nil {
-	//	log.Fatalf("Couldn't save accounts pdf of %v", r.Stylist)
-	//}
-	//time.Sleep(500 * time.Millisecond)
+	time.Sleep(500 * time.Millisecond)
+	//save to chair renters dropbox folder
+	err = pt.Save(dir1 + fn1)
+	if err != nil {
+		log.Fatalf("Couldn't save dropbox pdf of %v", r.Stylist)
+	}
+	time.Sleep(500 * time.Millisecond)
+	//save to salon accounts folder
+	err = pt.Save(dir2 + fn2)
+	if err != nil {
+		log.Fatalf("Couldn't save accounts pdf of %v", r.Stylist)
+	}
+	time.Sleep(500 * time.Millisecond)
 }
 
 func dateFormat(d string) (f string) {
