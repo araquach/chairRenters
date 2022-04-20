@@ -72,9 +72,10 @@ func main() {
 		products, _ := strconv.ParseFloat(col[7], 8)
 		tips, _ := strconv.ParseFloat(col[8], 8)
 		extra, _ := strconv.ParseFloat(col[9], 8)
+		servicePercent, _ := strconv.ParseFloat(col[10], 8)
 
 		totalRev := services + products
-		serviceCharge := services * .45
+		serviceCharge := services * servicePercent
 		wklyCharge := float64(weeks) * 5.00
 		servVAT := (serviceCharge + wklyCharge) * .2
 		serviceRel := services - serviceCharge - wklyCharge - servVAT
@@ -131,7 +132,7 @@ func main() {
 	}
 	for _, v := range results {
 		createPDF(v)
-		sendInvoice(v)
+		// sendInvoice(v)
 		fmt.Println(v.Stylist, v.Invoice, v.TotalRel)
 	}
 }
@@ -174,13 +175,13 @@ func createPDF(r InvoiceFigures) {
 	}
 
 	// Date Range:
-	err = pt.Insert(string(r.DateFrom) + " to " + string(r.DateTo), 1, 465, 221, 100, 100, gopdf.Left|gopdf.Top)
+	err = pt.Insert(string(r.DateFrom)+" to "+string(r.DateTo), 1, 465, 221, 100, 100, gopdf.Left|gopdf.Top)
 	if err != nil {
 		panic(err)
 	}
 
 	// Service Revenue:
-	err = pt.Insert(string("£" + r.Services), 1, 200, 281.5, 100, 100, gopdf.Center|gopdf.Top)
+	err = pt.Insert(string("£"+r.Services), 1, 200, 281.5, 100, 100, gopdf.Center|gopdf.Top)
 	if err != nil {
 		panic(err)
 	}
@@ -188,7 +189,7 @@ func createPDF(r InvoiceFigures) {
 	time.Sleep(150 * time.Millisecond)
 
 	// Product Revenue:
-	err = pt.Insert("£" + r.Products, 1, 200, 305.5, 100, 100, gopdf.Center|gopdf.Top)
+	err = pt.Insert("£"+r.Products, 1, 200, 305.5, 100, 100, gopdf.Center|gopdf.Top)
 	if err != nil {
 		panic(err)
 	}
@@ -244,13 +245,13 @@ func createPDF(r InvoiceFigures) {
 	}
 
 	// Other Service Payments
-	err = pt.Insert("£" + r.Extra, 1, 200, 574.5, 100, 100, gopdf.Center|gopdf.Top)
+	err = pt.Insert("£"+r.Extra, 1, 200, 574.5, 100, 100, gopdf.Center|gopdf.Top)
 	if err != nil {
 		panic(err)
 	}
 
 	// Tips
-	err = pt.Insert("£" + r.Tips, 1, 200, 600.5, 100, 100, gopdf.Center|gopdf.Top)
+	err = pt.Insert("£"+r.Tips, 1, 200, 600.5, 100, 100, gopdf.Center|gopdf.Top)
 	if err != nil {
 		panic(err)
 	}
@@ -343,7 +344,7 @@ func createPDF(r InvoiceFigures) {
 	homedir := myself.HomeDir
 
 	dir1 := homedir + "/Jakata Salon Dropbox/Adam Carter/Salon Stuff/chair renters/" + r.Stylist + "/Invoices/"
-	fn1 := "invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf"
+	fn1 := "invoice " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf"
 
 	//get year for directory
 	d := dateFormat(r.Date)
@@ -351,11 +352,11 @@ func createPDF(r InvoiceFigures) {
 	y := strings.Split(d, "-")[2]
 
 	dir2 := homedir + "/Jakata Salon Dropbox/Adam Carter/Salon Stuff/Salon Accounts 2/Invoices//20" + y + "/" + m + y + "/"
-	fn2 := r.Stylist + " - inv " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf"
+	fn2 := r.Stylist + " - inv " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf"
 
 	time.Sleep(600 * time.Millisecond)
 	//save within the apps output folder
-	err = pt.Save("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf")
+	err = pt.Save("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf")
 	if err != nil {
 		log.Fatalf("Couldn't save output pdf of %v", r.Stylist)
 	}
@@ -382,9 +383,10 @@ func dateFormat(d string) (f string) {
 
 func sendInvoice(r InvoiceFigures) {
 	email := map[string]string{
-		"Natalie Sharpe": "nsharpe13@yahoo.com",
-		"Matthew Lane":   "xmlaneyx@hotmail.co.uk",
+		"Natalie Sharpe":   "nsharpe13@yahoo.com",
+		"Matthew Lane":     "xmlaneyx@hotmail.co.uk",
 		"Michelle Railton": "michellerailton@hotmail.com",
+		"Georgia Lutton":   "jorja_1993@hotmail.com",
 	}
 
 	htmlContent, err := ParseEmailTemplate("email/template.gohtml", r)
@@ -407,7 +409,7 @@ func sendInvoice(r InvoiceFigures) {
 	m := mg.NewMessage(sender, subject, body, recipient)
 
 	m.SetHtml(htmlContent)
-	m.AddAttachment("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) +  ".pdf")
+	m.AddAttachment("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf")
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
