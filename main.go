@@ -386,7 +386,8 @@ func sendInvoice(r InvoiceFigures) {
 		"Natalie Sharpe":   "nsharpe13@yahoo.com",
 		"Matthew Lane":     "xmlaneyx@hotmail.co.uk",
 		"Michelle Railton": "michellerailton@hotmail.com",
-		"Georgia Lutton":   "GL.hairgal@gmail.com",
+		"Georgia Lutton":   "gl.hairgal@gmail.com",
+		"Joanne Birchall": "joannemahoney84@gmail.com",
 	}
 
 	htmlContent, err := ParseEmailTemplate("email/template.gohtml", r)
