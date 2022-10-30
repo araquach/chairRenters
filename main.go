@@ -28,6 +28,7 @@ type InvoiceFigures struct {
 	Services       string
 	Products       string
 	TotalRev       string
+	ServicePercent string
 	ServiceCharge  string
 	WklyCharge     string
 	ServVAT        string
@@ -91,6 +92,7 @@ func main() {
 		totalRel := serviceRel + retailRel + tips + extra
 
 		tr := fmt.Sprintf("£%.2f", totalRev)
+		sp := fmt.Sprintf("%v%%", servicePercent*100)
 		sc := fmt.Sprintf("£%.2f", serviceCharge)
 		wc := fmt.Sprintf("£%.2f", wklyCharge)
 		sv := fmt.Sprintf("£%.2f", servVAT)
@@ -116,6 +118,7 @@ func main() {
 			Tips:           col[8],
 			Extra:          col[9],
 			TotalRev:       tr,
+			ServicePercent: sp,
 			ServiceCharge:  sc,
 			WklyCharge:     wc,
 			ServVAT:        sv,
@@ -212,7 +215,13 @@ func createPDF(r InvoiceFigures) {
 
 	time.Sleep(200 * time.Millisecond)
 
-	// 45% Service Charge
+	// Service Percent
+	err = pt.Insert(r.ServicePercent, 1, 30, 406.5, 100, 100, gopdf.Center|gopdf.Top)
+	if err != nil {
+		panic(err)
+	}
+
+	// Service Charge
 	err = pt.Insert(r.ServiceCharge, 1, 200, 406.5, 100, 100, gopdf.Center|gopdf.Top)
 	if err != nil {
 		panic(err)
@@ -387,7 +396,7 @@ func sendInvoice(r InvoiceFigures) {
 		"Matthew Lane":     "xmlaneyx@hotmail.co.uk",
 		"Michelle Railton": "michellerailton@hotmail.com",
 		"Georgia Lutton":   "gl.hairgal@gmail.com",
-		"Joanne Birchall": "joannemahoney84@gmail.com",
+		"Joanne Birchall":  "joannemahoney84@gmail.com",
 	}
 
 	htmlContent, err := ParseEmailTemplate("email/template.gohtml", r)
