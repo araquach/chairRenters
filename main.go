@@ -15,6 +15,7 @@ import (
 	"os/user"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -133,11 +134,26 @@ func main() {
 			TotalRel:       total,
 		})
 	}
+
+	done := make(chan bool, len(results))
+
+	// Process each invoice concurrently using goroutines
 	for _, v := range results {
-		createPDF(v)
-		sendInvoice(v)
-		fmt.Println(v.Stylist, v.Invoice, v.TotalRel)
+		go processInvoice(v, done)
 	}
+	// Wait for all goroutines to finish
+	for range results {
+		<-done
+	}
+}
+
+func processInvoice(v InvoiceFigures, done chan<- bool) {
+	createPDF(v)
+	time.Sleep(2 * time.Second)
+	sendInvoice(v)
+	fmt.Println(v.Stylist, v.Invoice, v.TotalRel)
+	// Signal that this goroutine is done
+	done <- true
 }
 
 func createPDF(r InvoiceFigures) {
@@ -147,241 +163,232 @@ func createPDF(r InvoiceFigures) {
 		panic("Couldn't open pdf.")
 	}
 
-	err = pt.AddFont("helvetica", "fonts/Helvetica.ttf")
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		defer wg.Done() // Decrease the WaitGroup counter when the operation is done
+		// Insert your text here, e.g.:
+		err = pt.AddFont("helvetica", "fonts/Helvetica.ttf")
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
 
-	err = pt.AddFont("helvetica-bold", "fonts/Helvetica-Bold.ttf")
-	if err != nil {
-		log.Fatal(err)
-		return
-	}
+		err = pt.AddFont("helvetica-bold", "fonts/Helvetica-Bold.ttf")
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
 
-	err = pt.SetFont("helvetica", "", 10)
-	if err != nil {
-		panic(err)
-	}
+		err = pt.SetFont("helvetica", "", 10)
+		if err != nil {
+			panic(err)
+		}
 
-	//insert text to pdf
-	// Invoice:
-	err = pt.Insert(string(r.Invoice), 1, 78, 198, 100, 100, gopdf.Left|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		//insert text to pdf
+		// Invoice:
+		err = pt.Insert(r.Invoice, 1, 78, 198, 100, 100, gopdf.Left|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	// Date:
-	err = pt.Insert(string(r.Date), 1, 78, 221, 100, 100, gopdf.Left|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		// Date:
+		err = pt.Insert(r.Date, 1, 78, 221, 100, 100, gopdf.Left|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	// Date Range:
-	err = pt.Insert(string(r.DateFrom)+" to "+string(r.DateTo), 1, 465, 221, 100, 100, gopdf.Left|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		// Date Range:
+		err = pt.Insert(string(r.DateFrom)+" to "+string(r.DateTo), 1, 465, 221, 100, 100, gopdf.Left|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	// Service Revenue:
-	err = pt.Insert(string("£"+r.Services), 1, 200, 281.5, 100, 100, gopdf.Center|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		// Service Revenue:
+		err = pt.Insert("£"+r.Services, 1, 200, 281.5, 100, 100, gopdf.Center|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	time.Sleep(200 * time.Millisecond)
+		// Product Revenue:
+		err = pt.Insert("£"+r.Products, 1, 200, 305.5, 100, 100, gopdf.Center|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	// Product Revenue:
-	err = pt.Insert("£"+r.Products, 1, 200, 305.5, 100, 100, gopdf.Center|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		err = pt.SetFont("helvetica-bold", "", 10)
+		if err != nil {
+			panic(err)
+		}
 
-	err = pt.SetFont("helvetica-bold", "", 10)
-	if err != nil {
-		panic(err)
-	}
+		// Total Revenue:
+		err = pt.Insert(r.TotalRev, 1, 200, 332, 100, 100, gopdf.Center|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	// Total Revenue:
-	err = pt.Insert(r.TotalRev, 1, 200, 332, 100, 100, gopdf.Center|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		err = pt.SetFont("helvetica", "", 10)
+		if err != nil {
+			panic(err)
+		}
 
-	err = pt.SetFont("helvetica", "", 10)
-	if err != nil {
-		panic(err)
-	}
+		// Service Percent
+		err = pt.Insert(r.ServicePercent, 1, 30, 406.5, 100, 100, gopdf.Center|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	time.Sleep(200 * time.Millisecond)
+		// Service Charge
+		err = pt.Insert(r.ServiceCharge, 1, 200, 406.5, 100, 100, gopdf.Center|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	// Service Percent
-	err = pt.Insert(r.ServicePercent, 1, 30, 406.5, 100, 100, gopdf.Center|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		// Weekly Charge
+		err = pt.Insert(r.WklyCharge, 1, 200, 433, 100, 100, gopdf.Center|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	// Service Charge
-	err = pt.Insert(r.ServiceCharge, 1, 200, 406.5, 100, 100, gopdf.Center|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		// VAT
+		err = pt.Insert(r.ServVAT, 1, 200, 458.5, 100, 100, gopdf.Center|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	// Weekly Charge
-	err = pt.Insert(r.WklyCharge, 1, 200, 433, 100, 100, gopdf.Center|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		// Service Credit Release
+		err = pt.Insert(r.ServiceRel, 1, 200, 522.5, 100, 100, gopdf.Center|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	// VAT
-	err = pt.Insert(r.ServVAT, 1, 200, 458.5, 100, 100, gopdf.Center|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		// Retail Credit Release
+		err = pt.Insert(r.RetailRel, 1, 200, 549.5, 100, 100, gopdf.Center|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	// Service Credit Release
-	err = pt.Insert(r.ServiceRel, 1, 200, 522.5, 100, 100, gopdf.Center|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		// Other Service Payments
+		err = pt.Insert("£"+r.Extra, 1, 200, 574.5, 100, 100, gopdf.Center|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	time.Sleep(200 * time.Millisecond)
+		// Tips
+		err = pt.Insert("£"+r.Tips, 1, 200, 600.5, 100, 100, gopdf.Center|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	// Retail Credit Release
-	err = pt.Insert(r.RetailRel, 1, 200, 549.5, 100, 100, gopdf.Center|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		err = pt.SetFont("helvetica-bold", "", 10)
+		if err != nil {
+			panic(err)
+		}
 
-	// Other Service Payments
-	err = pt.Insert("£"+r.Extra, 1, 200, 574.5, 100, 100, gopdf.Center|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		// Total Credit Released
+		err = pt.Insert(r.TotalRel, 1, 200, 627.5, 100, 100, gopdf.Center|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	// Tips
-	err = pt.Insert("£"+r.Tips, 1, 200, 600.5, 100, 100, gopdf.Center|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		// Total Remaining
+		err = pt.Insert("£0.00", 1, 200, 653, 100, 100, gopdf.Center|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	err = pt.SetFont("helvetica-bold", "", 10)
-	if err != nil {
-		panic(err)
-	}
+		err = pt.SetFont("helvetica", "", 10)
+		if err != nil {
+			panic(err)
+		}
 
-	// Total Credit Released
-	err = pt.Insert(r.TotalRel, 1, 200, 627.5, 100, 100, gopdf.Center|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		//
+		err = pt.Insert(r.Date, 1, 200, 717.5, 100, 100, gopdf.Center|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	time.Sleep(200 * time.Millisecond)
+		err = pt.SetFont("helvetica", "", 10)
+		if err != nil {
+			panic(err)
+		}
 
-	// Total Remaining
-	err = pt.Insert("£0.00", 1, 200, 653, 100, 100, gopdf.Center|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		// 50% Retail Charge on retail
+		err = pt.Insert(r.RetailPurchase, 1, 465, 406.5, 100, 100, gopdf.Center|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	err = pt.SetFont("helvetica", "", 10)
-	if err != nil {
-		panic(err)
-	}
+		// 40% Charge on retail
+		err = pt.Insert(r.RetailProfit, 1, 465, 433, 100, 100, gopdf.Center|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	//
-	err = pt.Insert(r.Date, 1, 200, 717.5, 100, 100, gopdf.Center|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		// VAT
+		err = pt.Insert(r.RetailVAT, 1, 465, 458.5, 100, 100, gopdf.Center|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	err = pt.SetFont("helvetica", "", 10)
-	if err != nil {
-		panic(err)
-	}
+		// Total Charges
+		err = pt.Insert(r.Charges, 1, 465, 522.5, 100, 100, gopdf.Center|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	time.Sleep(200 * time.Millisecond)
+		// Total VAT
+		err = pt.Insert(r.ChargesVAT, 1, 465, 549.5, 100, 100, gopdf.Center|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	// 50% Retail Charge on retail
-	err = pt.Insert(r.RetailPurchase, 1, 465, 406.5, 100, 100, gopdf.Center|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		err = pt.SetFont("helvetica-bold", "", 10)
+		if err != nil {
+			panic(err)
+		}
 
-	// 40% Charge on retail
-	err = pt.Insert(r.RetailProfit, 1, 465, 433, 100, 100, gopdf.Center|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		// Total Charge
+		err = pt.Insert(r.TotalCharge, 1, 465, 574.5, 100, 100, gopdf.Center|gopdf.Top)
+		if err != nil {
+			panic(err)
+		}
 
-	// VAT
-	err = pt.Insert(r.RetailVAT, 1, 465, 458.5, 100, 100, gopdf.Center|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		//get home directory
+		myself, err := user.Current()
+		if err != nil {
+			panic(err)
+		}
+		homedir := myself.HomeDir
 
-	// Total Charges
-	err = pt.Insert(r.Charges, 1, 465, 522.5, 100, 100, gopdf.Center|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		d := dateFormat(r.Date)
+		m := strings.Split(d, "-")[1]
+		y := strings.Split(d, "-")[2]
 
-	// Total VAT
-	err = pt.Insert(r.ChargesVAT, 1, 465, 549.5, 100, 100, gopdf.Center|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
+		dir1 := homedir + "/Jakata Salon Dropbox/Adam Carter/Salon Stuff/chair renters/" + r.Stylist + "/Invoices/"
+		fn1 := "invoice " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf"
 
-	time.Sleep(200 * time.Millisecond)
-
-	err = pt.SetFont("helvetica-bold", "", 10)
-	if err != nil {
-		panic(err)
-	}
-
-	// Total Charge
-	err = pt.Insert(r.TotalCharge, 1, 465, 574.5, 100, 100, gopdf.Center|gopdf.Top)
-	if err != nil {
-		panic(err)
-	}
-
-	//get home directory
-	myself, err := user.Current()
-	if err != nil {
-		panic(err)
-	}
-	homedir := myself.HomeDir
-
-	dir1 := homedir + "/Jakata Salon Dropbox/Adam Carter/Salon Stuff/chair renters/" + r.Stylist + "/Invoices/"
-	fn1 := "invoice " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf"
-
-	//get year for directory
-	d := dateFormat(r.Date)
-	m := strings.Split(d, "-")[1]
-	y := strings.Split(d, "-")[2]
-
-	dir2 := homedir + "/Jakata Salon Dropbox/Adam Carter/Salon Stuff/Salon Accounts 2/Invoices//20" + y + "/" + m + y + "/"
-	fn2 := r.Stylist + " - inv " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf"
-
-	time.Sleep(800 * time.Millisecond)
-	//save within the apps output folder
-	err = pt.Save("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf")
-	if err != nil {
-		log.Fatalf("Couldn't save output pdf of %v", r.Stylist)
-	}
-	time.Sleep(800 * time.Millisecond)
-	//save to chair renters dropbox folder
-	err = pt.Save(dir1 + fn1)
-	if err != nil {
-		log.Fatalf("Couldn't save dropbox pdf of %v", r.Stylist)
-	}
-	time.Sleep(800 * time.Millisecond)
-	//save to salon accounts folder
-	err = pt.Save(dir2 + fn2)
-	if err != nil {
-		log.Fatalf("Couldn't save accounts pdf of %v", r.Stylist)
-	}
-	time.Sleep(800 * time.Millisecond)
+		dir2 := homedir + "/Jakata Salon Dropbox/Adam Carter/Salon Stuff/Salon Accounts 2/Invoices//20" + y + "/" + m + y + "/"
+		fn2 := r.Stylist + " - inv " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf"
+		time.Sleep(500 * time.Millisecond)
+		//save within the apps output folder
+		err = pt.Save("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf")
+		if err != nil {
+			log.Fatalf("Couldn't save output pdf of %v", r.Stylist)
+		}
+		time.Sleep(500 * time.Millisecond)
+		//save to chair renters dropbox folder
+		err = pt.Save(dir1 + fn1)
+		if err != nil {
+			log.Fatalf("Couldn't save dropbox pdf of %v", r.Stylist)
+		}
+		time.Sleep(500 * time.Millisecond)
+		//save to salon accounts folder
+		err = pt.Save(dir2 + fn2)
+		if err != nil {
+			log.Fatalf("Couldn't save accounts pdf of %v", r.Stylist)
+		}
+	}()
 }
 
 func dateFormat(d string) (f string) {
