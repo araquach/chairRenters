@@ -370,19 +370,19 @@ func createPDF(r InvoiceFigures) {
 
 		dir2 := homedir + "/Jakata Salon Dropbox/Adam Carter/Salon Stuff/Salon Accounts 2/Invoices//20" + y + "/" + m + y + "/"
 		fn2 := r.Stylist + " - inv " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf"
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(1000 * time.Millisecond)
 		//save within the apps output folder
 		err = pt.Save("output/" + r.Stylist + "/invoice " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf")
 		if err != nil {
 			log.Fatalf("Couldn't save output pdf of %v", r.Stylist)
 		}
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(1000 * time.Millisecond)
 		//save to chair renters dropbox folder
 		err = pt.Save(dir1 + fn1)
 		if err != nil {
 			log.Fatalf("Couldn't save dropbox pdf of %v", r.Stylist)
 		}
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(1000 * time.Millisecond)
 		//save to salon accounts folder
 		err = pt.Save(dir2 + fn2)
 		if err != nil {
