@@ -2,8 +2,7 @@
 Invoice number: {{.Invoice}}
 For period: {{ .DateFrom }} to {{ .DateTo }}
 
-Services: {{ .Services }}
-Products: {{ .Products }}
-Total Revenue: {{ .TotalRev }}
+Services: {{ .Turnover }}
+Products: {{ .RetailRevenue }}
 
 Credit Released: {{ .TotalRel }}

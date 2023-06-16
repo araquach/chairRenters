@@ -80,7 +80,6 @@ func main() {
 		charges := serviceCharge + wklyCharge
 		chargesVAT := servVAT
 		totalCharge := charges + chargesVAT
-		//need formula
 		retailRel := ((products / 2) / 100) * 45
 		totalRel := serviceRel + retailRel + tips + extra
 
@@ -134,7 +133,7 @@ func main() {
 func processInvoice(v InvoiceFigures, done chan<- bool) {
 	createPDF(v)
 	time.Sleep(2 * time.Second)
-	//sendInvoice(v)
+	sendInvoice(v)
 	fmt.Println(v.Stylist, v.Invoice, v.TotalRel)
 	// Signal that this goroutine is done
 	done <- true
@@ -282,6 +281,7 @@ func createPDF(r InvoiceFigures) {
 		if err != nil {
 			panic(err)
 		}
+
 		homedir := myself.HomeDir
 
 		d := dateFormat(r.Date)
