@@ -12,6 +12,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"os/user"
 	"strconv"
 	"strings"
 	"sync"
@@ -44,10 +45,8 @@ type InvoiceFigures struct {
 func main() {
 	var results []InvoiceFigures
 
-	//now := time.Now()
-	//today := now.Format("02-01-2006")
-
-	today := "test"
+	now := time.Now()
+	today := now.Format("02-01-2006")
 
 	content, _ := ioutil.ReadFile("figures/" + today + ".csv")
 
@@ -82,7 +81,7 @@ func main() {
 		chargesVAT := servVAT
 		totalCharge := charges + chargesVAT
 		//need formula
-		retailRel := ((products / 2) / 100) * 40
+		retailRel := ((products / 2) / 100) * 45
 		totalRel := serviceRel + retailRel + tips + extra
 
 		sp := fmt.Sprintf("%v%%", servicePercent*100)
@@ -278,22 +277,22 @@ func createPDF(r InvoiceFigures) {
 			panic(err)
 		}
 
-		//get home directory
-		//myself, err := user.Current()
-		//if err != nil {
-		//	panic(err)
-		//}
-		//homedir := myself.HomeDir
-		//
-		//d := dateFormat(r.Date)
-		//m := strings.Split(d, "-")[1]
-		//y := strings.Split(d, "-")[2]
-		//
-		//dir1 := homedir + "/Jakata Salon Dropbox/Adam Carter/Salon Stuff/chair renters/" + r.Stylist + "/Invoices/"
-		//fn1 := "invoice " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf"
-		//
-		//dir2 := homedir + "/Jakata Salon Dropbox/Adam Carter/Salon Stuff/Salon Accounts 2/Invoices//20" + y + "/" + m + y + "/"
-		//fn2 := r.Stylist + " - inv " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf"
+		// get home directory
+		myself, err := user.Current()
+		if err != nil {
+			panic(err)
+		}
+		homedir := myself.HomeDir
+
+		d := dateFormat(r.Date)
+		m := strings.Split(d, "-")[1]
+		y := strings.Split(d, "-")[2]
+
+		dir1 := homedir + "/Jakata Salon Dropbox/Adam Carter/Salon Stuff/chair renters/" + r.Stylist + "/Invoices/"
+		fn1 := "invoice " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf"
+
+		dir2 := homedir + "/Jakata Salon Dropbox/Adam Carter/Salon Stuff/Salon Accounts 2/Invoices//20" + y + "/" + m + y + "/"
+		fn2 := r.Stylist + " - inv " + r.Invoice + " - " + dateFormat(r.Date) + ".pdf"
 
 		time.Sleep(1000 * time.Millisecond)
 		//save within the apps output folder
@@ -302,17 +301,17 @@ func createPDF(r InvoiceFigures) {
 			log.Fatalf("Couldn't save output pdf of %v", r.Stylist)
 		}
 		time.Sleep(1000 * time.Millisecond)
-		//save to chair renters dropbox folder
-		//err = pt.Save(dir1 + fn1)
-		//if err != nil {
-		//	log.Fatalf("Couldn't save dropbox pdf of %v", r.Stylist)
-		//}
+		// save to chair renters dropbox folder
+		err = pt.Save(dir1 + fn1)
+		if err != nil {
+			log.Fatalf("Couldn't save dropbox pdf of %v", r.Stylist)
+		}
 		time.Sleep(1000 * time.Millisecond)
-		//save to salon accounts folder
-		//err = pt.Save(dir2 + fn2)
-		//if err != nil {
-		//	log.Fatalf("Couldn't save accounts pdf of %v", r.Stylist)
-		//}
+		// save to salon accounts folder
+		err = pt.Save(dir2 + fn2)
+		if err != nil {
+			log.Fatalf("Couldn't save accounts pdf of %v", r.Stylist)
+		}
 	}()
 }
 
