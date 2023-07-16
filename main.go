@@ -123,6 +123,7 @@ func main() {
 	// Process each invoice concurrently using goroutines
 	for _, v := range results {
 		go processInvoice(v, done)
+		sendInvoice(v)
 	}
 	// Wait for all goroutines to finish
 	for range results {
@@ -133,7 +134,6 @@ func main() {
 func processInvoice(v InvoiceFigures, done chan<- bool) {
 	createPDF(v)
 	time.Sleep(2 * time.Second)
-	sendInvoice(v)
 	fmt.Println(v.Stylist, v.Invoice, v.TotalRel)
 	// Signal that this goroutine is done
 	done <- true
