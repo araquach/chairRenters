@@ -123,7 +123,7 @@ func main() {
 	// Process each invoice concurrently using goroutines
 	for _, v := range results {
 		go processInvoice(v, done)
-		sendInvoice(v)
+		//sendInvoice(v)
 	}
 	// Wait for all goroutines to finish
 	for range results {
